@@ -21,6 +21,7 @@ def start_jobs(dir):
                 PyTerm.log("Running module %s" % module)
                 
                 if os.fork() == 0:
+                    PyTerm.setLogFile(defcls.getLogFile())
                     defcls.onStart()
                     defcls.handle()
                     defcls.onFinish()
