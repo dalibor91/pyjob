@@ -3,7 +3,6 @@ from lib import PyTerm
 from lib import JobScanner
 from lib import print_help
 from lib import run_command
-from jobs import JOBS_DIR
 
 APP_ROOT = os.getenv('APP_ROOT')
 
