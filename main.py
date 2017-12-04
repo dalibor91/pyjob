@@ -1,9 +1,9 @@
 import os, sys
 from lib import PyTerm
 from lib import JobScanner
-from lib import start_jobs
+from lib import print_help
+from lib import run_command
 from jobs import JOBS_DIR
-
 
 APP_ROOT = os.getenv('APP_ROOT')
 
@@ -12,5 +12,7 @@ if APP_ROOT is None:
     PyTerm.error("Please export APP_ROOT!")
     sys.exit(1)
 
-
-start_jobs(JOBS_DIR);
+if len(sys.argv) == 1:
+    print_help()
+else:
+    run_command(sys.argv[1], sys.argv[1:], APP_ROOT)

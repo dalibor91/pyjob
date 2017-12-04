@@ -23,6 +23,7 @@ class PyTerm():
         else: 
             with open(PyTerm.log_file, "a") as f:
                 f.write(msg+"\n")
+                f.close()
         
     @staticmethod 
     def log(msg):

@@ -43,4 +43,3 @@ class JobScanner():
                 if isinstance(attr_cls, PyJob):
                     return attr_cls
         return None
-        

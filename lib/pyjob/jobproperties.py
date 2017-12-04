@@ -14,11 +14,13 @@ class JobProperties():
         if os.path.isfile(self.__props_file__):
             with open(self.__props_file__) as fp:
                 self.__props__ = json.load(fp)
+                fp.close()
         return self
                 
     def flush(self):
         with open(self.__props_file__, 'w') as fp:
             fp.write(json.dumps(self.__props__, sort_keys=False, indent=4))
+            fp.close()
         return self
             
     def writeInMemory(self, key, val):

@@ -18,10 +18,11 @@ class PyJob(object):
         self.log_file = "%s/storage/logs/%s.log" % (os.getenv('APP_ROOT'), name)
         
         self.properties().merge({
-            "last_init": time.time(),
+            "init_time": time.time(),
             "lock_file": self.lock_file, 
             "log_file" : self.log_file,
-            "finished": False
+            "finished": False, 
+            "failed" : False
         });
         
         PyTerm.log("__init__(%s)" % self.job_name);
@@ -35,20 +36,23 @@ class PyJob(object):
         self.unlockProcess();
 
         self.properties().merge({
-            "last_fail": time.time(), 
-            "finished": time.time(),
+            "fail_time": time.time(), 
+            "done_time": time.time(),
+            "failed" : True,
             "finished": True, 
             "fail_msg": str(e) 
         })
         
+        sys.exit(1)
+        
     def onFinish(self):
         PyTerm.log("onFinish(%s)" % self.job_name);
-        self.unlockProcess();
             
         self.properties().merge({
-            "last_success" : time.time(), 
+            "done_time" : time.time(), 
             "finished": True
         });
+        self.unlockProcess();
         
         sys.exit(0)
         
@@ -69,8 +73,10 @@ class PyJob(object):
     def lockProcess(self):
         with open(self.lock_file, "w") as f:
             f.write(str(os.getpid()))
+            f.close()
     
     def unlockProcess(self):
+        PyTerm.log("unlockProcess(%s)" % self.job_name)
         if os.path.isfile(self.lock_file):
             os.unlink(self.lock_file)
     

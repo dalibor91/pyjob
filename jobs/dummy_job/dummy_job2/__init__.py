@@ -14,4 +14,4 @@ class DummyJob(PyJob):
         self.hello();
         
     def shouldRun(self, last_run):
-        return True;
+        return False;
