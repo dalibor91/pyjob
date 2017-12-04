@@ -7,6 +7,31 @@ import sys
 
 MAX_PROCESSES= 40
 
+def start_job(dir, module):
+    PyTerm.log("start_job(%s)" % dir);
+    scanner = JobScanner(dir)
+    
+    defcls = scanner.get_job_class(module)
+    if defcls is None:
+        PyTerm.error("%s does not have PyJob class" % module)
+        return False
+    
+    if not defcls.shouldRun(0):
+        PyTerm.warning("%s should not run" % module)
+        return False
+    
+    try:
+        defcls.onStart()
+        defcls.handle()
+        defcls.onFinish()
+    except Exception, e:
+        PyTerm.error(str(e));
+        if 'defcls' in vars():
+            defcls.onFail(e)
+        sys.exit(1)
+    sys.exit(0)
+
+
 def start_jobs(dir):
     PyTerm.log("start_jobs(%s)" % dir);
     scanner = JobScanner(dir)
@@ -22,7 +47,7 @@ def start_jobs(dir):
                 PyTerm.error("%s does not have PyJob class" % module)
                 continue 
             
-            if (defcls.shouldRun(0)):
+            if defcls.shouldRun(0):
                 counter+=1
                 PyTerm.log("Running module %s" % module)
                 
@@ -86,5 +111,7 @@ def run_command(command, rest_commands, dir):
         start_jobs("%s/jobs" % dir)
     elif command == 'cleanup':
         run_cleanup(dir)
+    elif command == 'run' and len(rest_commands) > 0:
+        start_job("%s/jobs" % dir, rest_commands[0])
     else:
         print_help()

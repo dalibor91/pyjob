@@ -15,4 +15,4 @@ if APP_ROOT is None:
 if len(sys.argv) == 1:
     print_help()
 else:
-    run_command(sys.argv[1], sys.argv[1:], APP_ROOT)
+    run_command(sys.argv[1], sys.argv[2:], APP_ROOT)
