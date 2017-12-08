@@ -7,7 +7,7 @@ import time
 class CheckdeadJob(PyJob):   
     def onStart(self):
         PyJob.onStart(self)
-        self.lockProcess()
+        self.lock().lock()
         
     def handle(self):
         PyJob.handle(self);
@@ -28,8 +28,8 @@ class CheckdeadJob(PyJob):
                 os.unlink(file)
                 
         
-    def shouldRun(self, last_run):
-        if self.isProcessLocked():
+    def shouldRun(self):
+        if self.lock().isActive():
             return False
         
         last_done    = self.properties().read('done_time')

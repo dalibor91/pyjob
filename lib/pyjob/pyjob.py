@@ -1,25 +1,24 @@
 from pyterm import PyTerm
 from jobproperties import JobProperties
+from joblock import JobLock
 import sys
 import os
 import time
 
 class PyJob(object):
     
-    __props_file__  = None
+    __props_file__ = None
+    __lock_file__ = None
     
     job_name   = ''
-    lock_file  = ''
     log_file   = ''
     
     def __init__(self, name=''):
         self.job_name = name
-        self.lock_file = "%s/storage/locks/%s.lock" % (os.getenv('APP_ROOT'), name)
         self.log_file = "%s/storage/logs/%s.log" % (os.getenv('APP_ROOT'), name)
         
         self.properties().merge({
             "init_time": time.time(),
-            "lock_file": self.lock_file, 
             "log_file" : self.log_file,
             "finished": False, 
             "failed" : False
@@ -33,7 +32,7 @@ class PyJob(object):
         
     def onFail(self, e=None):
         PyTerm.log("onFail(%s)" % self.job_name);
-        self.unlockProcess();
+        self.lock().unlock()
 
         self.properties().merge({
             "fail_time": time.time(), 
@@ -52,33 +51,26 @@ class PyJob(object):
             "done_time" : time.time(), 
             "finished": True
         });
-        self.unlockProcess();
+        
+        self.lock().unlock()
         
         sys.exit(0)
         
     def handle(self):
         PyTerm.log("handle(%s)" % self.job_name);
         
-    def shouldRun(self, last_run):
+    def shouldRun(self):
         return False
     
     def properties(self):
         if self.__props_file__ is None:
             self.__props_file__ = JobProperties("%s/storage/props/%s.json" % (os.getenv('APP_ROOT'), self.job_name))
         return self.__props_file__;
+    
+    def lock(self):
+        if self.__lock_file__ is None:
+            self.__lock_file__ = JobLock("%s/storage/locks/%s.lock" % (os.getenv('APP_ROOT'), self.job_name))
+        return self.__lock_file__;
 
     def getLogFile(self):
         return self.log_file
-    
-    def lockProcess(self):
-        with open(self.lock_file, "w") as f:
-            f.write(str(os.getpid()))
-            f.close()
-    
-    def unlockProcess(self):
-        PyTerm.log("unlockProcess(%s)" % self.job_name)
-        if os.path.isfile(self.lock_file):
-            os.unlink(self.lock_file)
-    
-    def isProcessLocked(self):
-        return os.path.isfile(self.lock_file)

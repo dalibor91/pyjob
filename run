@@ -1,0 +1,22 @@
+#!/bin/bash 
+
+directory="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+python=$(which python)
+
+export APP_ROOT="$directory"
+
+if [ "$1" = "all" ];
+then
+       echo "App will start as deamon runing every 5 sec"	
+	{
+	while :;
+	do 
+		$python main.py all > "${directory}/storage/logs/out.log" 2>>"${directory}/storage/logs/err.log" 
+		sleep 5
+	done
+	} &
+	disown
+else
+	$python main.py $@
+fi
